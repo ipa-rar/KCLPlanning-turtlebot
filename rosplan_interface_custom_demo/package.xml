@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>rosplan_interface_custom_demo</name>
+  <version>1.0.0</version>
+  <description>
+    Demos for custom action intefaces ROSPlan: launch files, scripts, and rviz configs.
+  </description>
+  <maintainer email="waiyangchan@outlook.com">Waiyang</maintainer>
+  <license>TODO</license>
+  <url type="website">http://github.com/KCL-Planning/ROSPlan</url>
+  <author email="waiyangchan@outlook.com">Waiyang</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>turtlebot3_gazebo</run_depend>
+  <run_depend>turtlebot3_navigation</run_depend>
+  <run_depend>dwa_local_planner</run_depend>
+  <run_depend>move_base_msgs</run_depend>
+  
+</package>

@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- ROSPlan turtlebot3 demo with custom ROSPlan action interface -->
+
+    <arg name="map_file" default="$(find rosplan_interface_custom_demo)/maps/playground.yaml"/>
+    <arg name="gazebo_gui" default="true"/>
+
+	<!-- Parameters for ar marker detection -->
+	<arg name="marker_size" default="25.0" />
+	<arg name="max_new_marker_error" default="0.08" />
+	<arg name="max_track_error" default="0.2" />
+	<arg name="cam_image_topic" default="/camera/rgb/image_raw" />
+	<arg name="cam_info_topic" default="/camera/rgb/camera_info" />
+	<arg name="output_frame" default="/base_footprint" />
+
+	<!-- turtlebot3 simulation -->
+    <include file="$(find rosplan_interface_custom_demo)/launch/turtlebot3_bringup_sim.launch" >
+        <arg name="gazebo_gui" value="$(arg gazebo_gui)"/>
+    </include>
+
+    <!-- turtlebot3 navigation: move base, amcl (localisation) -->
+    <include file="$(find turtlebot3_navigation)/launch/turtlebot3_navigation.launch" >
+        <arg name="map_file" value="$(arg map_file)"/>
+        <arg name="open_rviz" value="false"/>
+    </include>
+
+	<!-- roadmap (random waypoint generation) -->
+	<include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" />
+
+	<!-- ROSPlan -->
+
+	<include file="$(find rosplan_planning_system)/launch/interfaced_planning_system.launch" >
+		<arg name="domain_path"		value="$(find rosplan_interface_custom_demo)/common/domain_turtlebot_move.pddl" />
+		<arg name="autom_gen_problem_path" value="$(find rosplan_interface_custom_demo)/common/gen_move_problem.pddl" />
+		<arg name="problem_path"	value="" />
+		<arg name="data_path" value="$(find rosplan_interface_custom_demo)/common/" />
+	</include>
+
+
+	<!-- Simulated/ Dummy Action Interfaces  -->
+
+	<!-- <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+		<arg name="pddl_action_name" value="dock" />
+		<arg name="action_duration" value="1" />
+	</include>
+	<include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+		<arg name="pddl_action_name" value="undock" />
+		<arg name="action_duration" value="1" />
+	</include>
+
+	<include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+		<arg name="pddl_action_name" value="localise" />
+		<arg name="action_duration" value="1" />
+	</include> -->
+
+	<!-- <include file="$(find rosplan_planning_system)/launch/includes/simulated_action.launch" >
+		<arg name="pddl_action_name" value="goto_waypoint" />
+		<arg name="action_duration" value="1" />
+	</include> -->
+
+
+
+	<!-- Actual Action Interface for localization -->
+	<node name="rosplan_interface_localization" pkg="rosplan_interface_localization" type="rplocalization" respawn="false" output="screen"> 
+		<param name="pddl_action_name" value="localise" />
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+		<param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+		<param name="waypoint_file" value = "$(find rosplan_interface_custom_demo)/config/waypoints.yaml" />
+	</node> 
+
+	<node name="rosplan_interface_dock" pkg="rosplan_interface_docker" type="rpdock" respawn="false" output="screen"> 
+		<param name="pddl_action_name" value="dock" />
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+		<param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+	</node> 
+
+	<node name="rosplan_interface_undock" pkg="rosplan_interface_docker" type="rpundock" respawn="false" output="screen"> 
+		<param name="pddl_action_name" value="undock" />
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+		<param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+	</node> 
+
+    <node pkg="rosplan_interface_movebase" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen">
+		<param name="pddl_action_name" value="goto_waypoint" />
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+        <param name="action_server" value="/move_base" />
+        <param name="action_dispatch_topic" value="/rosplan_plan_dispatcher/action_dispatch" />
+        <param name="action_feedback_topic" value="/rosplan_plan_dispatcher/action_feedback" />
+    </node>
+
+    <!-- visualisation of robot sensor data -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosplan_interface_custom_demo)/config/turtlebot3.rviz" />
+
+    <!-- ar marker detection-->
+
+	<node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen">
+		<param name="marker_size"           type="double" value="$(arg marker_size)" />
+		<param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+		<param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+		<param name="output_frame"          type="string" value="$(arg output_frame)" />
+
+		<remap from="camera_image"  to="$(arg cam_image_topic)" />
+		<remap from="camera_info"   to="$(arg cam_info_topic)" />
+	</node>
+<!-- action service for auto docking node (adapted from turtle3 auto parking application) -->
+  <node pkg="ar_dock_motion_server" name="go_to_dock_server" type="go_to_dock_server.py" output="screen"/>
+</launch>
+
