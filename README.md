@@ -1,6 +1,6 @@
 ## Package summary
 
-- 3rd_party 
+- 3rd_party packages
     - [ROSPlan related packages]
         - [Occupancy_grid_utils](https://github.com/clearpathrobotics/occupancy_grid_utils)
         - [ROSPlan](https://github.com/KCL-Planning/ROSPlan)
@@ -45,22 +45,6 @@ This marker models is the 'docking station' spot for turtlebot3 in Gazebo
 
 ---
 
-## Teleop control 
-### This is to check your turtlebot3 and gazebo installation installation    
-**[In gazebo]** You should see turtlebot3 is moving according to your keyboard input  
-**[On rviz]** You should be able to observe map, cost map and lazer scan points on the GUI  
-
-`Terminal 1 -- To bringup Gazebo simulator and Rviz`
-```
-roslaunch rosplan_interface_custom_demo simulated_actions.launch 
-```
-`Terminal 2 -- Use 'w' , 'a' , 's' , 'd' to move your robot `
-```
-roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
-```
-
---- 
-
 ## ROSplan + test [undock, localize , dock] custom action interface 
 This turtblebot will execute rosplan actions [undock, localize, dock ] in the ROSplan in Gazebo  
 
@@ -82,13 +66,13 @@ This turtblebot will execute rosplan actions [goto_waypoints] in the ROSplan in 
 
 `Terminal 1 -- To bringup Gazebo simulator and Rviz with ROSplan custom action interfaces`
 ```
-roslaunch rosplan_interface_custom_demo simulated_actions.launch 
+roslaunch rosplan_interface_custom_demo turtlebot3_gt_wp.launch 
 ```
 
 `Terminal 2 -- Generate plans`
 ```
 cd {YOUR_WORKSPACE_NAME}/src/rosplan_interface_custom_demo/scripts/
-./simulated_actions.bash
+./turtlebot_explore.bash
 ```
 ---
 
